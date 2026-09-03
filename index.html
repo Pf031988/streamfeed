@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a0f">
+  <meta name="description" content="StreamFeed — społeczność streamerów i widzów niezależna od platformy.">
+  <title>StreamFeed — streamerzy i widzowie w jednym miejscu</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090a0f;
+      --panel: #101218;
+      --panel-2: #151821;
+      --line: #252936;
+      --muted: #8f97a8;
+      --text: #f5f7fb;
+      --signal: #ff4f72;
+      --signal-2: #ff8b61;
+      --violet: #8d72ff;
+      --green: #5af0b2;
+      --shadow: 0 18px 60px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% -30%, rgba(141,114,255,.15), transparent 34rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button, textarea, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    .shell { width: min(1280px, 100%); margin: 0 auto; display: grid; grid-template-columns: 236px minmax(0, 620px) 292px; min-height: 100vh; }
+    .left, .right { position: sticky; top: 0; align-self: start; height: 100vh; padding: 24px 18px; }
+    .left { border-right: 1px solid var(--line); }
+    .right { border-left: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 1.18rem; font-weight: 850; letter-spacing: -.03em; margin: 0 8px 28px; }
+    .brand-mark { position: relative; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(145deg, var(--signal), var(--violet)); box-shadow: 0 0 28px rgba(255,79,114,.25); }
+    .brand-mark::after { content: ""; position: absolute; inset: 8px 9px; border-left: 8px solid white; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+    .beta { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .08em; border: 1px solid var(--line); padding: 2px 6px; border-radius: 99px; }
+    nav { display: grid; gap: 6px; }
+    .nav-item { display: flex; gap: 13px; align-items: center; border-radius: 13px; padding: 11px 12px; color: #b5bbca; font-weight: 650; }
+    .nav-item:hover, .nav-item.active { background: var(--panel-2); color: white; }
+    .nav-item.active { box-shadow: inset 3px 0 var(--signal); }
+    .ico { width: 21px; height: 21px; display: grid; place-items: center; font-size: 1.05rem; }
+    .primary { width: 100%; border: 0; cursor: pointer; border-radius: 13px; background: linear-gradient(135deg, var(--signal), #e84dcb); padding: 11px 15px; font-weight: 800; margin-top: 22px; box-shadow: 0 12px 26px rgba(255,79,114,.18); }
+    .profile-mini { position: absolute; bottom: 22px; left: 20px; right: 20px; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 13px; background: var(--panel); border: 1px solid var(--line); }
+    .avatar { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; font-weight: 850; background: linear-gradient(145deg, #2b3040, #1b1e28); border: 1px solid #353a49; }
+    .avatar.pink { background: linear-gradient(145deg, #ff4f72, #a83d98); }
+    .avatar.blue { background: linear-gradient(145deg, #6c7cff, #3240a9); }
+    .avatar.orange { background: linear-gradient(145deg, #ff9b45, #bd3e5f); }
+    .avatar.green { background: linear-gradient(145deg, #39d9a0, #23727b); }
+    .name { font-weight: 760; font-size: .94rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .handle, .meta { color: var(--muted); font-size: .79rem; }
+    main { min-width: 0; }
+    .topbar { position: sticky; top: 0; z-index: 20; background: rgba(9,10,15,.84); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); padding: 16px 20px 0; }
+    .topline { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    h1 { margin: 0; font-size: 1.1rem; letter-spacing: -.02em; }
+    .live-count { display: flex; gap: 7px; align-items: center; color: #cdd2dd; font-size: .82rem; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 5px rgba(255,79,114,.11); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(255,79,114,0); } }
+    .filters { display: flex; overflow-x: auto; scrollbar-width: none; gap: 20px; }
+    .filter { flex: 0 0 auto; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); padding: 0 1px 12px; cursor: pointer; font-weight: 690; font-size: .9rem; }
+    .filter.active { color: white; border-color: var(--signal); }
+    .composer { display: grid; grid-template-columns: 42px 1fr; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    textarea { width: 100%; min-height: 62px; resize: vertical; border: 0; background: transparent; color: white; outline: none; font-size: 1rem; padding: 7px 0; }
+    textarea::placeholder { color: #747c8d; }
+    .compose-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(37,41,54,.7); padding-top: 12px; }
+    .tools { display: flex; gap: 6px; }
+    .tool, .action { border: 0; background: transparent; cursor: pointer; color: var(--muted); border-radius: 9px; padding: 7px 8px; }
+    .tool:hover, .action:hover { background: var(--panel-2); color: white; }
+    .publish { border: 0; background: white; color: #11131a; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 800; }
+    .publish:disabled { opacity: .42; cursor: not-allowed; }
+    .feed-empty { display: none; text-align: center; padding: 55px 30px; color: var(--muted); }
+    .post { padding: 19px 20px; border-bottom: 1px solid var(--line); transition: background .18s; }
+    .post:hover { background: rgba(21,24,33,.48); }
+    .post-head { display: flex; gap: 11px; align-items: flex-start; }
+    .post-main { min-width: 0; flex: 1; }
+    .identity { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .verified { color: #8aa2ff; font-size: .78rem; }
+    .platform { margin-left: auto; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; padding: 3px 7px; border-radius: 6px; font-weight: 850; border: 1px solid var(--line); color: #bec4d2; }
+    .platform.twitch { color: #b89cff; border-color: rgba(145,100,255,.3); background: rgba(145,100,255,.08); }
+    .platform.kick { color: #70ef82; border-color: rgba(83,224,103,.3); background: rgba(83,224,103,.08); }
+    .platform.youtube { color: #ff6d76; border-color: rgba(255,76,89,.3); background: rgba(255,76,89,.08); }
+    .post-text { margin: 9px 0 14px; color: #e5e8ef; }
+    .stream-card { position: relative; overflow: hidden; min-height: 168px; display: flex; align-items: flex-end; padding: 16px; border-radius: 14px; border: 1px solid #35394a; background: linear-gradient(135deg, rgba(141,114,255,.7), rgba(255,79,114,.62)), linear-gradient(35deg, #202a44, #4a2748); }
+    .stream-card::before { content: ""; position: absolute; width: 230px; height: 230px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; right: -80px; top: -130px; box-shadow: 0 0 0 28px rgba(255,255,255,.04), 0 0 0 56px rgba(255,255,255,.03); }
+    .stream-card > div { position: relative; z-index: 1; }
+    .badge-live { display: inline-flex; align-items: center; gap: 6px; background: var(--signal); border-radius: 6px; padding: 4px 7px; font-size: .68rem; font-weight: 900; letter-spacing: .05em; }
+    .stream-title { margin-top: 8px; font-weight: 800; }
+    .stream-sub { color: rgba(255,255,255,.75); font-size: .82rem; }
+    .actions { margin: 8px -8px -6px; display: flex; justify-content: space-between; max-width: 390px; }
+    .action { display: inline-flex; align-items: center; gap: 7px; font-size: .8rem; }
+    .action.liked { color: var(--signal); background: rgba(255,79,114,.08); }
+    .right h2 { font-size: .9rem; margin: 2px 0 14px; letter-spacing: -.01em; }
+    .side-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 15px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .live-user { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 9px 0; }
+    .live-user + .live-user { border-top: 1px solid rgba(37,41,54,.7); }
+    .tiny-avatar { position: relative; width: 39px; height: 39px; border-radius: 12px; display: grid; place-items: center; font-size: .8rem; font-weight: 850; background: #282c38; }
+    .tiny-avatar::after { content: ""; position: absolute; width: 8px; height: 8px; right: -1px; bottom: -1px; background: var(--signal); border: 2px solid var(--panel); border-radius: 50%; }
+    .viewers { color: var(--muted); font-size: .72rem; }
+    .topic { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 0; }
+    .topic + .topic { border-top: 1px solid rgba(37,41,54,.7); }
+    .topic strong { display: block; font-size: .88rem; }
+    .topic span { color: var(--muted); font-size: .74rem; }
+    .follow { border: 1px solid #3a3f50; background: #1b1e27; border-radius: 8px; padding: 6px 9px; font-size: .73rem; font-weight: 750; cursor: pointer; }
+    .follow.following { color: var(--green); border-color: rgba(90,240,178,.28); }
+    .toast { position: fixed; left: 50%; bottom: 26px; translate: -50% 20px; opacity: 0; pointer-events: none; background: white; color: #0b0d12; padding: 10px 15px; border-radius: 10px; font-size: .85rem; font-weight: 760; box-shadow: var(--shadow); transition: .2s; z-index: 99; }
+    .toast.show { opacity: 1; translate: -50% 0; }
+    .mobile-nav { display: none; }
+    @media (max-width: 1020px) {
+      .shell { grid-template-columns: 82px minmax(0, 620px) 270px; }
+      .left { padding-inline: 13px; }
+      .brand span:not(.brand-mark), .nav-label, .profile-mini > div:not(.avatar) { display: none; }
+      .brand { justify-content: center; margin-inline: 0; }
+      .nav-item { justify-content: center; }
+      .profile-mini { left: 14px; right: 14px; justify-content: center; }
+    }
+    @media (max-width: 780px) {
+      .shell { display: block; max-width: 620px; padding-bottom: 68px; }
+      .left, .right { display: none; }
+      main { border-inline: 1px solid var(--line); min-height: 100vh; }
+      .mobile-nav { display: grid; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; grid-template-columns: repeat(5, 1fr); background: rgba(15,17,23,.94); backdrop-filter: blur(18px); border-top: 1px solid var(--line); padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+      .mobile-nav button { border: 0; background: none; color: var(--muted); padding: 7px; font-size: 1.08rem; }
+      .mobile-nav .create { width: 38px; height: 38px; justify-self: center; border-radius: 12px; color: white; background: linear-gradient(135deg, var(--signal), #dc4ecb); }
+    }
+    @media (max-width: 480px) {
+      main { border: 0; }
+      .topbar, .post, .composer { padding-left: 14px; padding-right: 14px; }
+      .post { padding-top: 16px; }
+      .platform { margin-left: 0; }
+      .actions { max-width: none; }
+      .action { gap: 5px; }
+      .stream-card { min-height: 145px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="left" aria-label="Główna nawigacja">
+      <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span><span>StreamFeed</span><span class="beta">BETA</span></a>
+      <nav>
+        <a class="nav-item active" href="#"><span class="ico">⌂</span><span class="nav-label">Dla Ciebie</span></a>
+        <a class="nav-item" href="#"><span class="ico">⌕</span><span class="nav-label">Odkrywaj</span></a>
+        <a class="nav-item" href="#"><span class="ico">◉</span><span class="nav-label">Na żywo</span></a>
+        <a class="nav-item" href="#"><span class="ico">♧</span><span class="nav-label">Społeczności</span></a>
+        <a class="nav-item" href="#"><span class="ico">♢</span><span class="nav-label">Powiadomienia</span></a>
+      </nav>
+      <button class="primary" id="focusComposer">Napisz post</button>
+      <div class="profile-mini">
+        <div class="avatar pink">PF</div>
+        <div><div class="name">Paweł</div><div class="handle">@pawel</div></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="topline">
+          <h1>Twój feed</h1>
+          <div class="live-count"><span class="live-dot"></span> 128 twórców na żywo</div>
+        </div>
+        <div class="filters" role="tablist" aria-label="Filtruj wpisy">
+          <button class="filter active" data-filter="all" role="tab">Wszystko</button>
+          <button class="filter" data-filter="twitch" role="tab">Twitch</button>
+          <button class="filter" data-filter="kick" role="tab">Kick</button>
+          <button class="filter" data-filter="youtube" role="tab">YouTube</button>
+          <button class="filter" data-filter="following" role="tab">Obserwowani</button>
+        </div>
+      </header>
+
+      <section class="composer" aria-label="Dodaj wpis">
+        <div class="avatar pink">PF</div>
+        <div>
+          <textarea id="postInput" maxlength="360" placeholder="Co dzieje się na streamie?"></textarea>
+          <div class="compose-actions">
+            <div class="tools"><button class="tool" aria-label="Dodaj zdjęcie">▧</button><button class="tool" aria-label="Dodaj klip">▶</button><button class="tool" aria-label="Dodaj ankietę">▥</button></div>
+            <button class="publish" id="publish" disabled>Opublikuj</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="feed" aria-live="polite">
+        <article class="post" data-platform="twitch" data-following="true">
+          <div class="post-head">
+            <div class="avatar blue">MK</div>
+            <div class="post-main">
+              <div class="identity"><span class="name">MatiKox</span><span class="verified">●</span><span class="handle">@matikox · 4 min</span><span class="platform twitch">Twitch</span></div>
+              <p class="post-text">Dziś lecimy z nową serią w Kingdom Come. Bez poradników, bez cofania zapisów. Jak długo przetrwamy? 😅</p>
+              <div class="stream-card">
+                <div><span class="badge-live">● NA ŻYWO</span><div class="stream-title">Pierwsze podejście — tryb hardcore</div><div class="stream-sub">Kingdom Come: Deliverance II · 1,2 tys. widzów</div></div>
+              </div>
+              <div class="actions"><button class="action" data-action="comment">◯ <span>48</span></button><button class="action" data-action="repost">↻ <span>17</span></button><button class="action" data-action="like">♡ <span>326</span></button><button class="action" data-action="share">⌁</button></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="post" data-platform="kick" data-following="false">
+          <div class="post-head">
+            <div class="avatar green">AS</div>
+            <div class="post-main">
+              <div class="identity"><span class="name">Astra</span><span class="verified">●</span><span class="handle">@astra · 18 min</span><span class="platform kick">Kick</span></div>
+              <p class="post-text">Szukam dwóch osób do wspólnego streama w sobotę. Co-op, luźna atmosfera, najlepiej coś z horrorem. Kto wchodzi?</p>
+              <div class="actions"><button class="action" data-action="comment">◯ <span>31</span></button><button class="action" data-action="repost">↻ <span>8</span></button><button class="action" data-action="like">♡ <span>94</span></button><button class="action" data-action="share">⌁</button></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="post" data-platform="youtube" data-following="true">
+          <div class="post-head">
+            <div class="avatar orange">RT</div>
+            <div class="post-main">
+              <div class="identity"><span class="name">RetroTomek</span><span class="handle">@retrotomek · 43 min</span><span class="platform youtube">YouTube</span></div>
+              <p class="post-text">Jaki tytuł z PlayStation 2 powinien wrócić w formie porządnego remake’u? Mój typ: pierwsze God of War.</p>
+              <div class="actions"><button class="action" data-action="comment">◯ <span>76</span></button><button class="action" data-action="repost">↻ <span>12</span></button><button class="action" data-action="like">♡ <span>211</span></button><button class="action" data-action="share">⌁</button></div>
+            </div>
+          </div>
+        </article>
+      </section>
+      <div class="feed-empty" id="empty">Na tym kanale nie ma jeszcze wpisów.</div>
+    </main>
+
+    <aside class="right">
+      <div class="side-card">
+        <h2>Teraz na żywo</h2>
+        <a class="live-user" href="#"><span class="tiny-avatar">NK</span><span><span class="name">NocnyKadr</span><span class="meta">Just Chatting</span></span><span class="viewers">3,4k</span></a>
+        <a class="live-user" href="#"><span class="tiny-avatar">LS</span><span><span class="name">LenaSpeed</span><span class="meta">F1 26</span></span><span class="viewers">892</span></a>
+        <a class="live-user" href="#"><span class="tiny-avatar">BZ</span><span><span class="name">BezZapisów</span><span class="meta">Horror</span></span><span class="viewers">418</span></a>
+      </div>
+      <div class="side-card">
+        <h2>Warto obserwować</h2>
+        <div class="topic"><span><strong>KajaIRL</strong><span>podróże · Twitch</span></span><button class="follow">Obserwuj</button></div>
+        <div class="topic"><span><strong>PixelowyOjciec</strong><span>retro · YouTube</span></span><button class="follow">Obserwuj</button></div>
+        <div class="topic"><span><strong>GramyRazem</strong><span>co-op · Kick</span></span><button class="follow">Obserwuj</button></div>
+      </div>
+      <div class="side-card">
+        <h2>Popularne teraz</h2>
+        <div class="topic"><span><strong>#Gamescom</strong><span>2,8 tys. wpisów</span></span></div>
+        <div class="topic"><span><strong>#PolskiTwitch</strong><span>987 wpisów</span></span></div>
+        <div class="topic"><span><strong>#MałyStreamer</strong><span>604 wpisy</span></span></div>
+      </div>
+    </aside>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Nawigacja mobilna"><button aria-label="Dla Ciebie">⌂</button><button aria-label="Odkrywaj">⌕</button><button class="create" id="mobileCompose" aria-label="Napisz post">＋</button><button aria-label="Na żywo">◉</button><button aria-label="Profil">◎</button></nav>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const input = document.querySelector('#postInput');
+    const publish = document.querySelector('#publish');
+    const feed = document.querySelector('#feed');
+    const empty = document.querySelector('#empty');
+    const toast = document.querySelector('#toast');
+
+    function notify(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    input.addEventListener('input', () => { publish.disabled = !input.value.trim(); });
+    document.querySelector('#focusComposer').addEventListener('click', () => input.focus());
+    document.querySelector('#mobileCompose').addEventListener('click', () => { input.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => input.focus(), 350); });
+
+    publish.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (!text) return;
+      const article = document.createElement('article');
+      article.className = 'post';
+      article.dataset.platform = 'all';
+      article.dataset.following = 'true';
+      article.innerHTML = `<div class="post-head"><div class="avatar pink">PF</div><div class="post-main"><div class="identity"><span class="name">Paweł</span><span class="handle">@pawel · teraz</span></div><p class="post-text"></p><div class="actions"><button class="action" data-action="comment">◯ <span>0</span></button><button class="action" data-action="repost">↻ <span>0</span></button><button class="action" data-action="like">♡ <span>0</span></button><button class="action" data-action="share">⌁</button></div></div></div>`;
+      article.querySelector('.post-text').textContent = text;
+      feed.prepend(article);
+      input.value = '';
+      publish.disabled = true;
+      notify('Wpis opublikowany');
+    });
+
+    document.querySelector('.filters').addEventListener('click', (event) => {
+      const button = event.target.closest('.filter');
+      if (!button) return;
+      document.querySelectorAll('.filter').forEach(item => item.classList.toggle('active', item === button));
+      const selected = button.dataset.filter;
+      let visible = 0;
+      document.querySelectorAll('.post').forEach(post => {
+        const show = selected === 'all' || post.dataset.platform === selected || (selected === 'following' && post.dataset.following === 'true');
+        post.hidden = !show;
+        if (show) visible += 1;
+      });
+      empty.style.display = visible ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', (event) => {
+      const action = event.target.closest('[data-action]');
+      if (action) {
+        if (action.dataset.action === 'share') { notify('Link skopiowany'); return; }
+        const count = action.querySelector('span');
+        if (!count) return;
+        if (action.dataset.action === 'like') {
+          const active = action.classList.toggle('liked');
+          action.firstChild.textContent = active ? '♥ ' : '♡ ';
+          count.textContent = Number(count.textContent) + (active ? 1 : -1);
+        } else notify(action.dataset.action === 'comment' ? 'Komentarze będą dostępne w następnej wersji' : 'Podano dalej');
+      }
+      const follow = event.target.closest('.follow');
+      if (follow) {
+        const active = follow.classList.toggle('following');
+        follow.textContent = active ? 'Obserwujesz' : 'Obserwuj';
+      }
+    });
+  </script>
+</body>
+</html>
